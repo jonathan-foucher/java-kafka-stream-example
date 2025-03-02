@@ -1,4 +1,4 @@
-package com.jonathanfoucher.kafkastream.errors.healthcheck;
+package com.jonathanfoucher.kafkastream.healthcheck;
 
 import com.jonathanfoucher.kafkastream.errors.HttpServerCreationException;
 import com.sun.net.httpserver.HttpServer;

@@ -1,7 +1,7 @@
 package com.jonathanfoucher.kafkastream;
 
 import com.jonathanfoucher.kafkastream.config.EnvConfig;
-import com.jonathanfoucher.kafkastream.errors.healthcheck.Healthcheck;
+import com.jonathanfoucher.kafkastream.healthcheck.Healthcheck;
 import com.jonathanfoucher.kafkastream.stream.MovieStream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.streams.KafkaStreams;
