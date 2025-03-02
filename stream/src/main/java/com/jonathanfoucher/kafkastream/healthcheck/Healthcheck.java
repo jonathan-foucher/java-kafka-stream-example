@@ -1,5 +1,6 @@
 package com.jonathanfoucher.kafkastream.healthcheck;
 
+import com.jonathanfoucher.kafkastream.config.EnvConfig;
 import com.jonathanfoucher.kafkastream.errors.HttpServerCreationException;
 import com.sun.net.httpserver.HttpServer;
 import lombok.extern.slf4j.Slf4j;
@@ -8,30 +9,36 @@ import org.apache.kafka.streams.KafkaStreams;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
+import static java.net.HttpURLConnection.*;
+
 @Slf4j
 public class Healthcheck {
-    private static final int HTTP_SERVER_PORT = 8091;
     private static final String HEALTH_ENDPOINT = "/health";
-    private static final int OK_STATUS_CODE = 200;
-    private static final int SERVICE_UNAVAILABLE_STATUS_CODE = 503;
+    private static final String GET_METHOD = "GET";
 
     private final KafkaStreams kafkaStreams;
+    private final EnvConfig envConfig;
     private HttpServer httpServer;
 
-    public Healthcheck(KafkaStreams kafkaStreams) {
+    public Healthcheck(KafkaStreams kafkaStreams, EnvConfig envConfig) {
         this.kafkaStreams = kafkaStreams;
+        this.envConfig = envConfig;
     }
 
     public void start() {
         try {
-            httpServer = HttpServer.create(new InetSocketAddress(HTTP_SERVER_PORT), 0);
+            httpServer = HttpServer.create(new InetSocketAddress(envConfig.getHttpServerPort()), 0);
         } catch (IOException exception) {
             throw new HttpServerCreationException(exception);
         }
 
         httpServer.createContext(HEALTH_ENDPOINT, exchange -> {
-            int statusCode = kafkaStreams.state().isRunningOrRebalancing() ? OK_STATUS_CODE : SERVICE_UNAVAILABLE_STATUS_CODE;
-            exchange.sendResponseHeaders(statusCode, 0);
+            if (exchange.getRequestMethod().equals(GET_METHOD)) {
+                int statusCode = kafkaStreams.state().isRunningOrRebalancing() ? HTTP_OK : HTTP_UNAVAILABLE;
+                exchange.sendResponseHeaders(statusCode, 0);
+            } else {
+                exchange.sendResponseHeaders(HTTP_BAD_METHOD, 0);
+            }
             exchange.close();
         });
 
@@ -41,5 +48,6 @@ public class Healthcheck {
 
     public void stop() {
         httpServer.stop(0);
+        log.info("Healthcheck http server stopped");
     }
 }

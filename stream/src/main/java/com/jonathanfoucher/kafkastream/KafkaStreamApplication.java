@@ -27,7 +27,7 @@ public class KafkaStreamApplication {
         KafkaStreams kafkaStreams = new KafkaStreams(topology, properties);
         kafkaStreams.start();
 
-        Healthcheck healthcheck = new Healthcheck(kafkaStreams);
+        Healthcheck healthcheck = new Healthcheck(kafkaStreams, envConfig);
         healthcheck.start();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
