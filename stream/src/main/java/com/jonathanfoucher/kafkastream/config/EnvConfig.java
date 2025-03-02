@@ -21,6 +21,8 @@ public class EnvConfig {
     private static final String SSL_TRUSTSTORE_TYPE = "SSL_TRUSTSTORE_TYPE";
     private static final String SSL_TRUSTSTORE_CERT = "SSL_TRUSTSTORE_CERT";
 
+    private static final String HTTP_SERVER_PORT = "HTTP_SERVER_PORT";
+
     public String getGroupId() {
         return System.getenv(GROUP_ID);
     }
@@ -39,14 +41,6 @@ public class EnvConfig {
 
     public String getSchemaRegistryUrl() {
         return System.getenv(SCHEMA_REGISTRY_URL);
-    }
-
-    public String getSchemaRegistryUser() {
-        return System.getenv(SCHEMA_REGISTRY_USER);
-    }
-
-    public String getSchemaRegistryPassword() {
-        return System.getenv(SCHEMA_REGISTRY_PASSWORD);
     }
 
     public String getAuthSource() {
@@ -79,6 +73,10 @@ public class EnvConfig {
 
     public String getSslTruststoreCert() {
         return System.getenv(SSL_TRUSTSTORE_CERT);
+    }
+
+    public int getHttpServerPort() {
+        return Integer.parseInt(System.getenv(HTTP_SERVER_PORT));
     }
 
     public String getUserInfo() {

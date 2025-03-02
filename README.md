@@ -40,6 +40,7 @@ For the Kafka stream you will have to set some environment variables:
 - SCHEMA_REGISTRY_URL=http://localhost:8181
 - TOPIC_IN=kafka_example_movie_json
 - TOPIC_OUT=kafka_example_movie_avro
+- HTTP_SERVER_PORT=8091
 
 The project also have an optional SSL config as example.
 
@@ -62,4 +63,11 @@ Delete a movie
 ```
 curl --request DELETE \
   --url http://localhost:8090/kafka-producer/movies/26
+```
+
+The Kafka stream has a healthcheck endpoint.
+It will answer a 200 status code if the Kafka stream is running or a 503 otherwise.
+```
+curl --request GET \
+  --url http://localhost:8091/health
 ```
