@@ -7,6 +7,7 @@ import org.apache.kafka.streams.processor.api.Processor;
 import org.apache.kafka.streams.processor.api.ProcessorContext;
 import org.apache.kafka.streams.processor.api.Record;
 
+import java.nio.ByteBuffer;
 import java.time.Instant;
 
 public class HeaderTransformer implements Processor<MovieJsonKey, MovieJsonValue, MovieJsonKey, MovieJsonValue> {
@@ -24,7 +25,10 @@ public class HeaderTransformer implements Processor<MovieJsonKey, MovieJsonValue
     public void process(Record<MovieJsonKey, MovieJsonValue> movieRecord) {
         MovieJsonKey key = movieRecord.key();
         Headers headers = movieRecord.headers();
-        headers.add(KEY_HEADER_NAME, new byte[]{key.getId().byteValue()});
+        byte[] movieId = ByteBuffer.allocate(Long.SIZE / Byte.SIZE)
+                .putLong(key.getId())
+                .array();
+        headers.add(KEY_HEADER_NAME, movieId);
         headers.add(TIME_HEADER_NAME, String.valueOf(Instant.now()).getBytes());
         processorContext.forward(movieRecord);
     }
