@@ -1,7 +1,7 @@
 package com.jonathanfoucher.kafkastream;
 
-
 import com.jonathanfoucher.kafkastream.config.EnvConfig;
+import com.jonathanfoucher.kafkastream.errors.healthcheck.Healthcheck;
 import com.jonathanfoucher.kafkastream.stream.MovieStream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.streams.KafkaStreams;
@@ -24,9 +24,15 @@ public class KafkaStreamApplication {
     }
 
     private static void startKafkaStreams(Properties properties, Topology topology) {
-        KafkaStreams streams = new KafkaStreams(topology, properties);
-        streams.start();
+        KafkaStreams kafkaStreams = new KafkaStreams(topology, properties);
+        kafkaStreams.start();
 
-        Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
+        Healthcheck healthcheck = new Healthcheck(kafkaStreams);
+        healthcheck.start();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            kafkaStreams.close();
+            healthcheck.stop();
+        }));
     }
 }
