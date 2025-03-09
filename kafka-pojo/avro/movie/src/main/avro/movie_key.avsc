@@ -1,0 +1,11 @@
+{
+  "namespace": "com.jonathanfoucher.pojo.avro.movie",
+  "type": "record",
+  "name": "MovieKey",
+  "fields": [
+    {
+      "name": "id",
+      "type": "long"
+    }
+  ]
+}
