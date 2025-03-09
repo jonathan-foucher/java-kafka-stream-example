@@ -2,7 +2,7 @@ package com.jonathanfoucher.kafkastream.stream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.jonathanfoucher.kafkastream.config.EnvConfig;
 import com.jonathanfoucher.kafkastream.data.dto.MovieJsonKey;
@@ -34,6 +34,8 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.fasterxml.jackson.databind.PropertyNamingStrategies.SNAKE_CASE;
+import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS;
 import static io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
@@ -70,9 +72,11 @@ class MovieStreamTest {
     private static final LocalDate MOVIE_RELEASE_DATE = LocalDate.of(2022, 2, 24);
 
     static {
-        objectMapper = new ObjectMapper();
-        objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
-        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper = JsonMapper.builder()
+                .addModule(new JavaTimeModule())
+                .propertyNamingStrategy(SNAKE_CASE)
+                .configure(WRITE_DATES_AS_TIMESTAMPS, false)
+                .build();
     }
 
     @BeforeEach
