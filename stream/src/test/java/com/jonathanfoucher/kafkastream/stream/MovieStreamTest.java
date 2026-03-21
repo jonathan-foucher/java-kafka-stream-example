@@ -57,7 +57,7 @@ class MovieStreamTest {
     private static final ObjectMapper objectMapper;
 
     private static final String AUTH_SOURCE = "USER_INFO";
-    private static final String BOOTSTRAP_SERVER = "localhost:9093";
+    private static final String BOOTSTRAP_SERVER = "localhost:9094";
     private static final String GROUP_ID = "movie-stream";
     private static final String SCHEMA_REGISTRY_URL = "http://localhost:8181";
     private static final String TOPIC_IN = "kafka_example_movie_json";
