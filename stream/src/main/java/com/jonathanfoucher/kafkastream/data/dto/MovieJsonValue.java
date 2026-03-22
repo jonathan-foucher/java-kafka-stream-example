@@ -1,11 +1,9 @@
 package com.jonathanfoucher.kafkastream.data.dto;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import lombok.Getter;
 import lombok.Setter;
+import tools.jackson.databind.PropertyNamingStrategies;
+import tools.jackson.databind.annotation.JsonNaming;
 
 import java.time.LocalDate;
 
@@ -15,7 +13,6 @@ import java.time.LocalDate;
 public class MovieJsonValue {
     private Long id;
     private String title;
-    @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate releaseDate;
 
     @Override

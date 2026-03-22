@@ -1,18 +1,17 @@
 package com.jonathanfoucher.kafkaproducer.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.jonathanfoucher.kafkaproducer.data.dto.MovieValue;
 import com.jonathanfoucher.kafkaproducer.services.MovieService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDate;
 
@@ -39,16 +38,12 @@ class MovieControllerTest {
     private static final String TITLE = "Some movie";
     private static final LocalDate RELEASE_DATE = LocalDate.of(2022, 7, 19);
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
-
-    static {
-        objectMapper.registerModule(new JavaTimeModule());
-    }
+    private static final JsonMapper jsonMapper = JsonMapper.builder().build();
 
     @BeforeEach
     void initEach() {
         mockMvc = MockMvcBuilders.standaloneSetup(movieController)
-                .setMessageConverters(new MappingJackson2HttpMessageConverter())
+                .setMessageConverters(new JacksonJsonHttpMessageConverter(jsonMapper))
                 .build();
     }
 
@@ -63,7 +58,7 @@ class MovieControllerTest {
         // WHEN / THEN
         mockMvc.perform(post(MOVIES_PATH)
                         .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(movieValue))
+                        .content(jsonMapper.writeValueAsString(movieValue))
                 )
                 .andExpect(status().isOk());
 

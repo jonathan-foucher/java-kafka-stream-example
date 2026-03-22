@@ -1,9 +1,5 @@
 package com.jonathanfoucher.kafkastream.stream;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.jonathanfoucher.kafkastream.config.EnvConfig;
 import com.jonathanfoucher.kafkastream.data.dto.MovieJsonKey;
 import com.jonathanfoucher.kafkastream.data.dto.MovieJsonValue;
@@ -27,6 +23,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.nio.ByteBuffer;
 import java.time.Instant;
@@ -34,12 +31,12 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.fasterxml.jackson.databind.PropertyNamingStrategies.SNAKE_CASE;
-import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS;
 import static io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
+import static tools.jackson.databind.PropertyNamingStrategies.SNAKE_CASE;
+import static tools.jackson.databind.cfg.DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS;
 
 @ExtendWith(MockitoExtension.class)
 class MovieStreamTest {
@@ -54,7 +51,10 @@ class MovieStreamTest {
     @InjectMocks
     private MovieStream movieStream;
 
-    private static final ObjectMapper objectMapper;
+    private static final JsonMapper jsonMapper = JsonMapper.builder()
+            .propertyNamingStrategy(SNAKE_CASE)
+            .configure(WRITE_DATES_AS_TIMESTAMPS, false)
+            .build();
 
     private static final String AUTH_SOURCE = "USER_INFO";
     private static final String BOOTSTRAP_SERVER = "localhost:9094";
@@ -70,14 +70,6 @@ class MovieStreamTest {
     private static final Long MOVIE_ID = 27L;
     private static final String MOVIE_TITLE = "Some movie title";
     private static final LocalDate MOVIE_RELEASE_DATE = LocalDate.of(2022, 2, 24);
-
-    static {
-        objectMapper = JsonMapper.builder()
-                .addModule(new JavaTimeModule())
-                .propertyNamingStrategy(SNAKE_CASE)
-                .configure(WRITE_DATES_AS_TIMESTAMPS, false)
-                .build();
-    }
 
     @BeforeEach
     void setup() {
@@ -109,13 +101,13 @@ class MovieStreamTest {
     }
 
     @Test
-    void processReceivedMovie() throws JsonProcessingException {
+    void processReceivedMovie() {
         // GIVEN
         MovieJsonKey movieKey = initMovieKey();
         MovieJsonValue movieValue = initMovieValue();
 
         // WHEN
-        inputTopic.pipeInput(objectMapper.writeValueAsString(movieKey), objectMapper.writeValueAsString(movieValue));
+        inputTopic.pipeInput(jsonMapper.writeValueAsString(movieKey), jsonMapper.writeValueAsString(movieValue));
 
         // THEN
         assertFalse(outputTopic.isEmpty());
@@ -138,12 +130,12 @@ class MovieStreamTest {
     }
 
     @Test
-    void processReceivedMovieTombstone() throws JsonProcessingException {
+    void processReceivedMovieTombstone() {
         // GIVEN
         MovieJsonKey movieKey = initMovieKey();
 
         // WHEN
-        inputTopic.pipeInput(objectMapper.writeValueAsString(movieKey), objectMapper.writeValueAsString(null));
+        inputTopic.pipeInput(jsonMapper.writeValueAsString(movieKey), jsonMapper.writeValueAsString(null));
 
         // THEN
         assertFalse(outputTopic.isEmpty());
@@ -168,7 +160,7 @@ class MovieStreamTest {
         MovieJsonValue movieValue = initMovieValue();
 
         // WHEN / THEN
-        assertThatThrownBy(() -> inputTopic.pipeInput("wrong_key", objectMapper.writeValueAsString(movieValue)))
+        assertThatThrownBy(() -> inputTopic.pipeInput("wrong_key", jsonMapper.writeValueAsString(movieValue)))
                 .hasCauseInstanceOf(DeserializationException.class)
                 .hasStackTraceContaining("JSON deserialization error: wrong_key");
 
@@ -181,7 +173,7 @@ class MovieStreamTest {
         MovieJsonKey movieKey = initMovieKey();
 
         // WHEN / THEN
-        assertThatThrownBy(() -> inputTopic.pipeInput(objectMapper.writeValueAsString(movieKey), "wrong_value"))
+        assertThatThrownBy(() -> inputTopic.pipeInput(jsonMapper.writeValueAsString(movieKey), "wrong_value"))
                 .hasCauseInstanceOf(DeserializationException.class)
                 .hasStackTraceContaining("JSON deserialization error: wrong_value");
 

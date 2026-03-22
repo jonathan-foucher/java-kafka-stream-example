@@ -6,8 +6,8 @@ server:
 spring:
   kafka:
     producer:
-      key-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      key-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
       bootstrap-servers: localhost:9094
       topic-name: kafka_example_movie_json
       properties:
