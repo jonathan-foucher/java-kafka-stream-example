@@ -78,6 +78,7 @@ services:
       echo -e 'Creating kafka topics'
       kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic kafka_example_movie_json --replication-factor 1 --partitions 6
       kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic kafka_example_movie_avro --replication-factor 1 --partitions 6
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic __transaction_state --replication-factor 1 --partitions 50 --config cleanup.policy=compact --config min.insync.replicas=1
 
       ub sr-ready schema-registry 8081 60
       if [[ \\
