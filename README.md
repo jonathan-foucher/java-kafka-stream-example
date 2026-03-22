@@ -1,10 +1,10 @@
 ## Introduction
-This project is an example of Kafka producing/consuming with Spring Boot and Avro format using a schema registry.
+This project is an example of Kafka streaming with Java.
 
-The repository contains three Spring Boot projects :
+The repository contains three projects :
 - a project to generate the required pojo from Avro
 - a kafka producer fed by a controller (REST API)
-- a kafka consumer that displays the received records in the logs
+- a kafka stream that consumes and transforms the data, then push it to another topic
 
 ## Run the project
 ### POJO
@@ -30,7 +30,14 @@ docker-compose -f docker/docker-compose.yml up -d
 You will be able to access kafka-ui on [this url](http://localhost:9090/)
 
 ### Application
-Once the Kafka environment started and healthy, you can start the Spring Boot projects and try them out.
+Once the Kafka environment started and healthy, you can start the Spring Boot producer and the Java kafka stream and try them out.
+
+For the kafka stream, you need to provide those environment variables
+```
+GROUP_ID=kstream_group_id;BOOTSTRAP_SERVER=localhost:9094;TOPIC_IN=kafka_example_movie_json;TOPIC_OUT=kafka_example_movie_avro;SCHEMA_REGISTRY_URL=http://localhost:8181;AUTH_SOURCE=USER_INFO;HTTP_SERVER_PORT=8091;
+```
+
+You can use those curl to feed the entry topic with the producer:
 
 Save a movie
 ```

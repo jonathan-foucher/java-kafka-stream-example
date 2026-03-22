@@ -1,6 +1,5 @@
 package com.jonathanfoucher.kafkastream.stream;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jonathanfoucher.kafkastream.config.EnvConfig;
 import com.jonathanfoucher.kafkastream.data.dto.MovieJsonKey;
 import com.jonathanfoucher.kafkastream.data.dto.MovieJsonValue;
@@ -20,16 +19,23 @@ import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.Named;
 import org.apache.kafka.streams.kstream.Produced;
+import tools.jackson.core.exc.StreamReadException;
+import tools.jackson.databind.PropertyNamingStrategies;
+import tools.jackson.databind.json.JsonMapper;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
 import static io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig.*;
+import static tools.jackson.databind.cfg.DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS;
 
 public class MovieStream {
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final JsonMapper jsonMapper = JsonMapper.builder()
+            .propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+            .disable(WRITE_DATES_AS_TIMESTAMPS)
+            .build();
+
     private final EnvConfig envConfig;
 
     private static final String COMPRESSION_FORMAT = "zstd";
@@ -44,7 +50,7 @@ public class MovieStream {
         properties.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, envConfig.getBootstrapServer());
         properties.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         properties.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
-        properties.put(StreamsConfig.DEFAULT_PRODUCTION_EXCEPTION_HANDLER_CLASS_CONFIG, CustomProductionExceptionHandler.class);
+        properties.put(StreamsConfig.PRODUCTION_EXCEPTION_HANDLER_CLASS_CONFIG, CustomProductionExceptionHandler.class);
         properties.put(StreamsConfig.PROCESSING_GUARANTEE_CONFIG, StreamsConfig.EXACTLY_ONCE_V2);
         properties.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, COMPRESSION_FORMAT);
 
@@ -100,8 +106,8 @@ public class MovieStream {
 
     private MovieJsonKey convertStringKeyToJsonKey(String key) {
         try {
-            return objectMapper.readValue(key.getBytes(), MovieJsonKey.class);
-        } catch (IOException exception) {
+            return jsonMapper.readValue(key.getBytes(), MovieJsonKey.class);
+        } catch (StreamReadException exception) {
             throw new DeserializationException(key, exception);
         }
     }
@@ -112,8 +118,8 @@ public class MovieStream {
         }
 
         try {
-            return objectMapper.readValue(value.getBytes(), MovieJsonValue.class);
-        } catch (IOException exception) {
+            return jsonMapper.readValue(value.getBytes(), MovieJsonValue.class);
+        } catch (StreamReadException exception) {
             throw new DeserializationException(value, exception);
         }
     }

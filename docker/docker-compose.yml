@@ -5,20 +5,20 @@ services:
     ports:
       - 9094:9094
     environment:
-     KAFKA_PROCESS_ROLES: controller,broker
-     KAFKA_NODE_ID: 1
-     KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
-     KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
-     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT
-     KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-     KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
-     KAFKA_LOG_DIRS: /var/lib/kafka/data
-     KAFKA_AUTO_CREATE_TOPICS_ENABLE: false
-     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-     KAFKA_LOG_RETENTION_HOURS: 168
-     KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-     CLUSTER_ID: local-kafka-cluster
+      KAFKA_PROCESS_ROLES: controller,broker
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: false
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      CLUSTER_ID: local-kafka-cluster
     healthcheck:
       test: kafka-topics --bootstrap-server kafka:9092 --list
       interval: 10s
@@ -76,6 +76,7 @@ services:
       "
       ub kafka-ready -b kafka:9092 1 60
       echo -e 'Creating kafka topics'
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic kafka_example_movie_json --replication-factor 1 --partitions 6
       kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic kafka_example_movie_avro --replication-factor 1 --partitions 6
 
       ub sr-ready schema-registry 8081 60

@@ -13,7 +13,7 @@ import java.util.Properties;
 public class KafkaStreamApplication {
     private static final EnvConfig envConfig = new EnvConfig();
 
-    public static void main(String[] args) {
+    static void main() {
         MovieStream movieStream = new MovieStream(envConfig);
 
         Properties properties = movieStream.createSteamConfigs();

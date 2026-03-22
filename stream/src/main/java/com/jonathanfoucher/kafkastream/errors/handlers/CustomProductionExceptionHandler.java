@@ -20,7 +20,7 @@ public class CustomProductionExceptionHandler implements ProductionExceptionHand
     private final EnvConfig envConfig = new EnvConfig();
 
     @Override
-    public ProductionExceptionHandlerResponse handle(ErrorHandlerContext errorHandlerContext, ProducerRecord<byte[], byte[]> producerRecord, Exception exception) {
+    public Response handleError(ErrorHandlerContext errorHandlerContext, ProducerRecord<byte[], byte[]> producerRecord, Exception exception) {
         Map<String, String> deserializerConfig = Collections.singletonMap(SCHEMA_REGISTRY_URL_CONFIG, envConfig.getSchemaRegistryUrl());
 
         Deserializer<MovieKey> movieKeyDeserializer = new SpecificAvroDeserializer<>();
@@ -44,7 +44,7 @@ public class CustomProductionExceptionHandler implements ProductionExceptionHand
         }
 
         log.error("Stream production error for key: {}, value: {}", key, value, exception);
-        return ProductionExceptionHandlerResponse.FAIL;
+        return Response.fail();
     }
 
     @Override
